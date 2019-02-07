@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			if('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('sw.js');
+				navigator.serviceWorker.ready.then(() => location = 'test.html');
+			} else alert("Your browser won't install the ServiceWorker. Make sure you access this page via https.");
+		</script>
+	</head>
+</html>
