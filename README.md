@@ -31,7 +31,7 @@ For a working example see the contents of `example`.
 ## Processing requests
 The `process` method of a handler is invoked with a `request` object. This consists of:
 | Property | Description |
-|----------|-------------|
+| -------- | ----------- |
 | `url` | The request's [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object |
 | `GET` | Provided GET-paramters |
 | `POST` | Provided POST-parameters |
