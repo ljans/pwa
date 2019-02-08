@@ -2,7 +2,7 @@
 self.importScripts(
 	'../service.min.js',
 	'serviceConfig.js',
-	'sampleHandler.js',
+	'sampleHandler.js'
 );
 
 // Setup the service
