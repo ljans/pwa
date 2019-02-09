@@ -31,12 +31,14 @@ For a working example see the contents of `example`.
 ## Processing requests
 The `process` method of a handler is invoked with a `request` object. This consists of:
 
-| Property | Description |
-| -------- | ----------- |
-| `url` | The request's [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object |
-| `GET` | Provided GET-paramters |
-| `POST` | Provided POST-parameters |
-| `params` | The matched groups from the handler's pattern |
+| Property | Type | Description |
+| :-- | :-- | :-- |
+| `url` | [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) | Request URL
+| `GET` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Provided GET-paramters |
+| `POST` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Provided POST-parameters |
+| `params` | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array) | Matched groups from the handler's pattern |
+
+**Heads Up:** The matched groups start at index `1` whereas `0` is the whole matched string.
 
 ## Filtering requests
 
