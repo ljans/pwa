@@ -1,5 +1,5 @@
 /*!
- * service.js for ServiceWorkers v1.1
+ * service.js for ServiceWorkers v1.2
  * Licensed under the MIT license
  * Copyright (c) 2019 Lukas Jans
  * https://github.com/luniverse/service
@@ -52,16 +52,22 @@ Service = class {
 		const cached = await caches.match(e.request);
 		if(cached) return cached;
 		
-		// Match call against handlers
+		// Match request against handlers
 		for(let handler of this.config.handlers) {
 			request.params = handler.pattern.exec(request.url.pathname);
 			if(request.params) {
 				
 				// Apply filters and process request
-				if(this.config.requestFilter) request = await this.config.requestFilter(request);
-				let response = await handler.process(request);
-				if(this.config.responseFilter) response = await this.config.responseFilter(response);
-				return response;
+				try {
+					if(this.config.requestFilter) request = await this.config.requestFilter(request);
+					let response = await handler.process(request);
+					if(this.config.responseFilter) response = await this.config.responseFilter(response);
+					return response;
+					
+				// Exception handling
+				} catch(exception) {
+					return this.config.exceptionHandler ? this.config.exceptionHandler(exception) : Response.error();
+				}
 			}
 		}
 		

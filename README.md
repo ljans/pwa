@@ -31,7 +31,7 @@ class SampleHandler {
 
 And that's it! The page `test.html` is now served from cache, and your `SampleHandler` can process requests. You don't need to register any `EventListener`.
 
-For a working example see the contents of `example`.
+For a working example see the contents of [example](example).
 
 
 ## Processing requests
@@ -74,7 +74,3 @@ class ServiceConfig {
 This allows for the configuration to be derived from some global controller managing your application.
 
 **Pro Tip:** Pass `version` in the constructor to enforce updates of the `ServiceWorker` due to version-changes in `sw.js`.
-
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

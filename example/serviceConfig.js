@@ -31,4 +31,12 @@ class ServiceConfig {
 		console.log('Outgoing response', response);
 		return response;
 	}
+	
+	// Handle exceptions
+	async exceptionHandler(exception) {
+		return new Response(null, {
+			status: 500,
+			statusText: exception,
+		});
+	}
 }
