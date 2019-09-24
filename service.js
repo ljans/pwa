@@ -1,5 +1,5 @@
 /*!
- * service.js for ServiceWorkers v1.2
+ * service.js for ServiceWorkers v1.3
  * Licensed under the MIT license
  * Copyright (c) 2019 Lukas Jans
  * https://github.com/luniverse/service
@@ -14,6 +14,7 @@ Service = class {
 		self.addEventListener('install', e => e.waitUntil(this.install()));
 		self.addEventListener('activate', e => e.waitUntil(this.activate()));
 		self.addEventListener('fetch', e => e.respondWith(this.fetch(e)));
+		self.addEventListener('message', e => this.message(e));
 	}
 	
 	// Install the service (if the promise gets rejected, the browser dismisses the installation)
@@ -22,7 +23,7 @@ Service = class {
 		// When ready, immediately replace the current service (if existing) by skipping its waiting-phase
 		self.skipWaiting();
 		
-		// Cache resources
+		// Cache resources (an exception causes the promise to reject)
 		const cache = await caches.open(this.config.version);
 		cache.addAll(this.config.cache);
 	}
@@ -73,5 +74,12 @@ Service = class {
 		
 		// Network fallback
 		return fetch(e.request);
+	}
+	
+	// Respond to messages
+	async message(e) {
+		if(!this.config.messageHandler) return;
+		const response = await this.config.messageHandler(e);
+		if(e.ports[0]) e.ports[0].postMessage(response);
 	}
 }

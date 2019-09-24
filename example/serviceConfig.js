@@ -39,4 +39,10 @@ class ServiceConfig {
 			statusText: exception,
 		});
 	}
+	
+	// Handle messages
+	async messageHandler(message) {
+		console.log('Incoming message');
+		return 'Outgoing message';
+	}
 }
