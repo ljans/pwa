@@ -1,5 +1,5 @@
 /*!
- * service.js for ServiceWorkers v1.2
+ * service.js for ServiceWorkers v1.4
  * Licensed under the MIT license
  * Copyright (c) 2019 Lukas Jans
  * https://github.com/luniverse/service
@@ -22,9 +22,11 @@ Service = class {
 		// When ready, immediately replace the current service (if existing) by skipping its waiting-phase
 		self.skipWaiting();
 		
-		// Cache resources
-		const cache = await caches.open(this.config.version);
-		cache.addAll(this.config.cache);
+		// Cache resources (an exception causes the promise to reject)
+		if(this.config.cache) {
+			const cache = await caches.open(this.config.version);
+			cache.addAll(this.config.cache);
+		}
 	}
 	
 	// Activate the service (it now is the only one responsible for this scope)
