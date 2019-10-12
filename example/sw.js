@@ -1,6 +1,6 @@
 // Import dependencies
 self.importScripts(
-	'../service.js',
+	'../service.min.js',
 	'serviceConfig.js',
 	'sampleHandler.js'
 );
