@@ -2,7 +2,7 @@
  * service.js for ServiceWorkers v1.4
  * Licensed under the MIT license
  * Copyright (c) 2019 Lukas Jans
- * https://github.com/luniverse/service
+ * https://github.com/luniverse/service.js
  */
 Service = class {
 	
