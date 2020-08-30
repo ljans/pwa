@@ -1,8 +1,8 @@
 /*!
- * service.js for ServiceWorkers v1.4
+ * Wrapper for ServiceWorkers v1.4
  * Licensed under the MIT license
- * Copyright (c) 2019 Lukas Jans
- * https://github.com/luniverse/service.js
+ * Copyright (c) 2020 Lukas Jans
+ * https://github.com/luniverse/service
  */
 Service = class {
 	
