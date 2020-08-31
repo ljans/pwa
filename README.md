@@ -1,65 +1,79 @@
 ## Getting started
-
-In your `ServiceWorker` (typically `sw.js`) construct a new instance of `Serivce` with a configuration object. This might look like so:
-
+Import the script into your ServiceWorker:
 ```javascript
-self.importScripts('service.min.js', 'sampleHandler.js');
+self.importScripts('service.min.js');
+```
+Now you can construct a new instance of `Service`:
+```javascript
+const service = new Service(config);
+```
+The features of the service can be configured using the `config` object as shown in the following sections. See [`example`](example) for a demo application.
 
-const service = new Service({
+### Caching
+You can provide an array `cache` consisting of files that should be loaded into the cache for offline access. Also define a `version` that controls whether the cache needs to be updated. Example:
+```javascript
+new Service({
 	version: 1,
-	cache: ['test.html'],
-	handlers: [new SampleHandler()],
+	cache: ['test.html', 'octocat.png'],
 });
 ```
 
-In `sampleHandler.js`, register a handler to process requests. You also need to define an URL-pattern to determine, which requests your handler should respond to.
-
-**Pro Tip:** This opens up the opportunity to enable routing for your PWA with multiple handlers.
-
-```javascript
-class SampleHandler {
-	
-	get pattern() {
-		return /\/say\/(.+)\/?$/;
-	}
-	
-	async process(request) {
-		return new Response('You wanted me to say "'+decodeURI(request.params[1])+'".');
-	}
-}
-```
-
-And that's it! The page `test.html` is now served from cache, and your `SampleHandler` can process requests. You don't need to register any `EventListener`.
-
-For a working example see the contents of [example](example).
-
-
-## Processing requests
-
-The `process` method of a handler is invoked with a `request` object. This consists of:
+### Custom handlers
+You can provide an array `handlers` consisting of custom handler objects. A handler is called if a requested url matches the regular expression provided by its property `pattern`. Then the handlers method `process` is invoked with the request object as parameter. It consists of:
 
 Property | Type | Description
-:-- | :-- | :--
+-- | -- | --
 `url` | [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) | Request URL
-`GET` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Provided GET-parameters
-`POST` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Provided POST-parameters
-`params` | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array) | Matched groups from the handler's pattern
+`GET` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Sent GET-parameters
+`POST` | [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams) | Sent POST-parameters
+`params` | [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array) | Matched groups from the handler's regular expression
 
-**Heads Up:** The matched groups start at index `1` whereas `0` is the whole matched string.
+Simple example for a custom handler:
+```javascript
+new Service({
+	handlers: [{
+		pattern: /test/,
+		process: request => new Response('Hello world!'),
+	}],
+});
+```
 
+### Filtering
+You can provide a method `requestFilter` that is invoked with the request object before processing it. The filter output is then passed to the custom handlers.
+In a smilar way, a `responseFilter` can be used to filter the handler output before sending it back to the browser. Example:
+```javascript
+new Service({
+	handlers: [{
+		pattern: /hello/,
+		process: request => 'Hello '+request.POST.get('name'),
+	}],
+	
+	// Manipulating POST parameter in request
+	requestFilter: request => {
+		request.POST.set('name', 'Alice');
+		return request;
+	},
+	
+	// Wrapping the text output in a response object
+	responseFilter: text => new Response(text),
+});
+```
 
-## Filtering requests
+### Exception handling
+By default, an exception in a handler results in an error response. You can catch exceptions using an `exceptionHandler`. Example:
+```javascript
+new Service({
+	handlers: [{
+		pattern: /test/,
+		process: () => { unknownFunction(); },
+	}],
+	
+	exceptionHandler: e => new Response('Error: '+e.message),
+});
+```
 
-Besides the `version`, `cache` and `handlers` of a service, there can also be passed *request filters* in the configuration object:
-
-* The `requestFilter` is invoked with every request handled by *any* registered handler. This for example can come in handy when you want to apply pagewide settings via `GET`-parameters across all your handlers.
-* The `responseFilter` can modify the result from the corresponding handler, e.g. changing headers of the [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) object.
-
-
-## Configuration class
-
-The configuration object in the constructor of `Service` can also be an instance of a class like this:
-
+### Configuration class
+The configuration object can also be an instance of a class implementing the desired methods:
 ```javascript
 class ServiceConfig {
 	get cache() {}
@@ -69,8 +83,6 @@ class ServiceConfig {
 	async requestFilter(request) {}
 	async responseFilter(response) {}
 }
+
+new Service(new ServiceConfig());
 ```
-
-This allows for the configuration to be derived from some global controller managing your application.
-
-**Pro Tip:** Pass `version` in the constructor to enforce updates of the `ServiceWorker` due to version-changes in `sw.js`.
