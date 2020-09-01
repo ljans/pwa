@@ -1,10 +1,10 @@
 /*!
- * Wrapper for ServiceWorkers v1.4
+ * pwa.js ServiceWorker wrapper v1.5
  * Licensed under the MIT license
  * Copyright (c) 2020 Lukas Jans
- * https://github.com/luniverse/service
+ * https://github.com/luniverse/pwa
  */
-Service = class {
+PWA = class {
 	
 	// Construct with configuration
 	constructor(config) {
@@ -16,28 +16,28 @@ Service = class {
 		self.addEventListener('fetch', e => e.respondWith(this.fetch(e)));
 	}
 	
-	// Install the service (if the promise gets rejected, the browser dismisses the installation)
+	// Install the ServiceWorker (if the promise gets rejected, the browser dismisses the installation)
 	async install() {
 			
-		// When ready, immediately replace the current service (if existing) by skipping its waiting-phase
+		// When ready, immediately replace the current ServiceWorker (if existing) by skipping the waiting-phase
 		self.skipWaiting();
 		
 		// Cache resources (an exception causes the promise to reject)
-		if(this.config.cache) {
-			const cache = await caches.open(this.config.version);
-			cache.addAll(this.config.cache);
+		if(this.config.cachedFiles) {
+			const cache = await caches.open(this.config.cacheVersion);
+			cache.addAll(this.config.cachedFiles);
 		}
 	}
 	
-	// Activate the service (it now is the only one responsible for this scope)
+	// Activate the ServiceWorker (it now is the only one responsible for this scope)
 	async activate() {
 
 		// Claim control over all clients in this scope
 		await clients.claim();
 		
-		// Delete caches from older versions of this service
+		// Delete caches from older versions of this PWA
 		for(const cache of await caches.keys()) {
-			if(cache != this.config.version) await caches.delete(cache);
+			if(cache != this.config.cacheVersion) await caches.delete(cache);
 		}
 	}
 	
@@ -55,9 +55,8 @@ Service = class {
 		if(cached) return cached;
 		
 		// Match request against handlers
-		for(let handler of this.config.handlers) {
-			request.params = handler.pattern.exec(request.url.pathname);
-			if(request.params) {
+		if(this.config.requestHandlers) for(let handler of this.config.requestHandlers) {
+			if(request.params = handler.pattern.exec(request.url.pathname)) {
 				
 				// Apply filters and process request
 				try {

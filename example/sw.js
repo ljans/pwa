@@ -1,10 +1,10 @@
 // Import dependencies
 self.importScripts(
-	'../service.min.js',
-	'serviceConfig.js',
+	'../pwa.min.js',
+	'config.js',
 	'sampleHandler.js'
 );
 
-// Setup the service
-const config = new ServiceConfig(1);
-const service = new Service(config);
+// Setup the PWA
+const config = new Config(1);
+const pwa = new PWA(config);

@@ -1,7 +1,7 @@
-class ServiceConfig {
+class Config {
 	
-	// Setup cached resources
-	get cache() {
+	// Setup the cache
+	get cachedFiles() {
 		return [
 			'test.html',
 			'octocat.png',
@@ -9,7 +9,7 @@ class ServiceConfig {
 	}
 	
 	// Setup request handlers
-	get handlers() {
+	get requestHandlers() {
 		return [
 			new SampleHandler(),
 		];
@@ -17,7 +17,7 @@ class ServiceConfig {
 	
 	// Construct with version
 	constructor(version) {
-		this.version = version;
+		this.cacheVersion = version;
 	}
 	
 	// Filter requests
