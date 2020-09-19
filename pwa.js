@@ -1,5 +1,5 @@
 /*!
- * pwa.js ServiceWorker wrapper v1.5
+ * pwa.js ServiceWorker wrapper v1.6
  * Licensed under the MIT license
  * Copyright (c) 2020 Lukas Jans
  * https://github.com/luniverse/pwa
@@ -45,7 +45,7 @@ PWA = class {
 	async fetch(e) {
 			
 		// Load the request
-		let request = {}
+		let request = {};
 		request.url = new URL(e.request.url);
 		request.GET = request.url.searchParams;
 		request.POST = new URLSearchParams(await e.request.clone().text());
@@ -54,9 +54,13 @@ PWA = class {
 		const cached = await caches.match(e.request);
 		if(cached) return cached;
 		
-		// Match request against handlers
+		// Let handlers process the request
 		if(this.config.requestHandlers) for(let handler of this.config.requestHandlers) {
-			if(request.params = handler.pattern.exec(request.url.pathname)) {
+			
+			// Match the handler pattern against the relative path inside the scope
+			const absolute = request.url.origin + request.url.pathname;
+			const relative = absolute.replace(self.registration.scope, '');
+			if(request.params = handler.pattern.exec(decodeURIComponent(relative))) {
 				
 				// Apply filters and process request
 				try {
