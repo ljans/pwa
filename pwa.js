@@ -4,7 +4,7 @@
  * Copyright (c) 2020 Lukas Jans
  * https://github.com/luniverse/pwa
  */
-PWA = class {
+class PWA {
 	
 	// Construct with configuration
 	constructor(config) {
