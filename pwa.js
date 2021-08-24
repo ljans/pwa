@@ -1,8 +1,8 @@
 /*!
  * pwa.js ServiceWorker wrapper v1.6
  * Licensed under the MIT license
- * Copyright (c) 2020 Lukas Jans
- * https://github.com/luniverse/pwa
+ * Copyright (c) 2021 Lukas Jans
+ * https://github.com/ljans/pwa
  */
 class PWA {
 	
