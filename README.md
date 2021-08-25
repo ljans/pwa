@@ -1,4 +1,4 @@
-# Luniverse PWA
+# PWA
 This simple tool makes it easy to create Progressive Web Apps featuring ServiceWorker functionality. See [`example`](example) for a demo application.
 
 ### Getting started
