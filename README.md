@@ -4,7 +4,7 @@ This simple tool makes it easy to create Progressive Web Apps featuring ServiceW
 ### Getting started
 Import the script into your ServiceWorker:
 ```javascript
-self.importScripts('pwa.min.js');
+self.importScripts('pwa.js');
 ```
 Now you can construct a new instance of `PWA`:
 ```javascript

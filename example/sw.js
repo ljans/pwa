@@ -1,6 +1,6 @@
 // Import dependencies
 self.importScripts(
-	'../pwa.min.js',
+	'../pwa.js',
 	'config.js',
 	'sampleHandler.js'
 );

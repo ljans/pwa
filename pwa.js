@@ -1,7 +1,7 @@
 /*!
- * pwa.js ServiceWorker wrapper v1.6
+ * pwa.js ServiceWorker wrapper v1.7
  * Licensed under the MIT license
- * Copyright (c) 2021 Lukas Jans
+ * Copyright (c) 2023 Lukas Jans
  * https://github.com/ljans/pwa
  */
 class PWA {
@@ -10,10 +10,10 @@ class PWA {
 	constructor(config) {
 		this.config = config;
 		
-		// Register events
+		// Register events (waitUntil ensures that the service worker does not change state until the promise is resolved)
 		self.addEventListener('install', e => e.waitUntil(this.install()));
 		self.addEventListener('activate', e => e.waitUntil(this.activate()));
-		self.addEventListener('fetch', e => e.respondWith(this.fetch(e)));
+		self.addEventListener('fetch', e => e.respondWith(this.fetch(e.request)));
 	}
 	
 	// Install the ServiceWorker (if the promise gets rejected, the browser dismisses the installation)
@@ -32,40 +32,65 @@ class PWA {
 	// Activate the ServiceWorker (it now is the only one responsible for this scope)
 	async activate() {
 
-		// Claim control over all clients in this scope
+		// Claim control over all clients in this scope (otherwise they won't use the sw if they were opened before the sw was registered)
 		await clients.claim();
 		
 		// Delete caches from older versions of this PWA
-		for(const cache of await caches.keys()) {
-			if(cache != this.config.cacheVersion) await caches.delete(cache);
+		for(const name of await caches.keys()) {
+			if(name != this.config.cacheVersion) await caches.delete(name);
 		}
 	}
 	
 	// Respond to fetch events
-	async fetch(e) {
+	async fetch(request) {
 			
 		// Load the request
-		let request = {};
-		request.url = new URL(e.request.url);
-		request.GET = request.url.searchParams;
-		request.POST = new URLSearchParams(await e.request.clone().text());
+		let data = {};
+		data.url = new URL(request.url);
+		data.GET = data.url.searchParams;
+		data.POST = new URLSearchParams(await request.clone().text());
 		
-		// Return cached resources
-		const cached = await caches.match(e.request);
-		if(cached) return cached;
+		// Try to deliver a cached response
+		if(this.config.cachedFiles) {
+			
+			// Check if the requested file is expected to be in cache (compare by absolute URL)
+			let expectedInCache = false;
+			for(const file of this.config.cachedFiles) {
+				const url = new URL(file, self.location);
+				if(url.toString() != data.url.toString()) continue;
+				expectedInCache = true;
+			}
+			
+			// Check if the requested file is actually cached
+			if(expectedInCache) {
+				const cached = await caches.match(request);
+				if(cached) return cached;
+				
+				// Try to restore cache integrity
+				/*if(navigator.onLine) {
+					const response = await fetch(request);
+					const cache = await caches.open(this.config.version);
+					cache.put(request, response.clone());
+					return response;
+				}*/
+				
+				// Fail the request otherwise
+				throw 'cache loss';
+			}
+		}
 		
 		// Let handlers process the request
 		if(this.config.requestHandlers) for(let handler of this.config.requestHandlers) {
 			
 			// Match the handler pattern against the relative path inside the scope
-			const absolute = request.url.origin + request.url.pathname;
+			const absolute = data.url.origin + data.url.pathname;
 			const relative = absolute.replace(self.registration.scope, '');
-			if(request.params = handler.pattern.exec(decodeURIComponent(relative))) {
+			if(data.params = handler.pattern.exec(decodeURIComponent(relative))) {
 				
 				// Apply filters and process request
 				try {
-					if(this.config.requestFilter) request = await this.config.requestFilter(request);
-					let response = await handler.process(request);
+					if(this.config.requestFilter) data = await this.config.requestFilter(data);
+					let response = await handler.process(data);
 					if(this.config.responseFilter) response = await this.config.responseFilter(response);
 					return response;
 					
@@ -76,7 +101,7 @@ class PWA {
 			}
 		}
 		
-		// Network fallback
-		return fetch(e.request);
+		// Fall back to network or fail the request
+		return navigator.onLine ? fetch(request) : Response.error();
 	}
 }
