@@ -1,7 +1,7 @@
 /*!
- * pwa.js ServiceWorker wrapper v1.7
+ * pwa.js ServiceWorker wrapper v1.8
  * Licensed under the MIT license
- * Copyright (c) 2023 Lukas Jans
+ * Copyright (c) 2024 Lukas Jans
  * https://github.com/ljans/pwa
  */
 class PWA {
@@ -25,7 +25,7 @@ class PWA {
 		// Cache resources (an exception causes the promise to reject)
 		if(this.config.cachedFiles) {
 			const cache = await caches.open(this.config.cacheVersion);
-			cache.addAll(this.config.cachedFiles);
+			await cache.addAll(this.config.cachedFiles);
 		}
 	}
 	
